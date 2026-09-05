@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { formatRupiah, formatTanggal, getRentangTanggalMinggu, getKeteranganMinggu } from '@/lib/format';
 import { NAMA_BULAN, APP_CONFIG } from '@/lib/constants';
+import { LOGO_MPK_BASE64, STEMPEL_MPK_BASE64 } from '@/lib/assets';
 import { ArusKasItem, UserSession } from '@/types';
 
 export default function LaporanPage() {
@@ -107,8 +108,7 @@ export default function LaporanPage() {
 
       // 1. LOGO & KOP SURAT RESMI
       try {
-        const logoData = await getBase64ImageFromUrl('/logo-mpk.png');
-        doc.addImage(logoData, 'PNG', 14, 9, 25, 25);
+        doc.addImage(LOGO_MPK_BASE64, 'PNG', 14, 9, 25, 25);
       } catch (e) {
         console.error('Logo loading failed:', e);
       }
@@ -282,8 +282,7 @@ export default function LaporanPage() {
 
       // Stempel Resmi MPK Transparan (Authentic Stamp Overlay)
       try {
-        const stampData = await getBase64ImageFromUrl('/stempel-mpk.png');
-        doc.addImage(stampData, 'PNG', 14, finalY3 + 6, 26, 26);
+        doc.addImage(STEMPEL_MPK_BASE64, 'PNG', 14, finalY3 + 6, 28, 28);
       } catch (e) {
         console.error('Stempel loading failed:', e);
       }
@@ -536,13 +535,13 @@ export default function LaporanPage() {
             <div className="font-semibold text-slate-900">Ketua Umum MPK</div>
             
             {/* Area Tanda Tangan & Cap Stempel Resmi */}
-            <div className="relative h-28 w-44 flex items-center justify-center my-1">
+            <div className="relative h-28 w-48 flex items-center justify-center my-1">
               <img
-                src="/stempel-mpk.png"
+                src={STEMPEL_MPK_BASE64}
                 alt="Stempel Resmi MPK Trenggana Sumapala"
-                className="absolute inset-0 m-auto w-24 h-24 object-contain opacity-90 -rotate-3 pointer-events-none drop-shadow-sm select-none"
+                className="absolute inset-0 m-auto w-28 h-28 object-contain opacity-95 -rotate-6 pointer-events-none drop-shadow-sm select-none"
               />
-              <div className="z-10 text-slate-400 italic text-[11px] font-mono select-none bg-white/40 px-2 py-0.5 rounded backdrop-blur-[0.5px]">
+              <div className="z-10 text-slate-400 italic text-[11px] font-mono select-none bg-white/60 px-2 py-0.5 rounded backdrop-blur-[0.5px]">
                 [Tanda Tangan Digital]
               </div>
             </div>
