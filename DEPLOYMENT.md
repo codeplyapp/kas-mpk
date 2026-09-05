@@ -96,6 +96,8 @@ git push -u origin main
 | `DATABASE_URL` | *(URL Transaction pooler Supabase Anda)* |
 | `DIRECT_URL` | *(URL Session / Direct Supabase Anda)* |
 | `JWT_SECRET` | *(String acak rahasia untuk enkripsi login session)* |
+| `UPSTASH_REDIS_REST_URL` | `https://tops-pipefish-129799.upstash.io` |
+| `UPSTASH_REDIS_REST_TOKEN` | `gQAAAAAAAfsHAAIgcDFjY2JiYzRlN2Q5NWM0YjI5YTBmODQxMzdhZGE1MzQxMA` |
 
 5. Klik tombol **"Deploy"**.
 6. Tunggu sekitar 1 menit hingga proses build selesai.

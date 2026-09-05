@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { APP_CONFIG, NAMA_BULAN } from '@/lib/constants';
 import { generateWhatsAppLink } from '@/lib/format';
+import { getCache, setCache, cacheKeys } from '@/lib/redis';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -19,6 +20,15 @@ export async function GET(request: Request) {
     const bulan = parseInt(searchParams.get('bulan') || (now.getMonth() + 1).toString(), 10);
     const tahun = parseInt(searchParams.get('tahun') || now.getFullYear().toString(), 10);
     const komisi = searchParams.get('komisi');
+
+    // Check Redis cache
+    const cacheKey = cacheKeys.tunggakan(bulan, tahun, komisi);
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return NextResponse.json(cachedData, {
+        headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-store' },
+      });
+    }
 
     const users = await prisma.user.findMany({
       where: komisi && komisi !== 'ALL' ? { komisi } : {},
@@ -88,13 +98,20 @@ export async function GET(request: Request) {
       }
     });
 
-    return NextResponse.json({
+    const responseData = {
       bulan,
       tahun,
       namaBulan,
       totalPenunggak: daftarTunggakan.length,
       totalNominalTunggakan: daftarTunggakan.reduce((sum, item) => sum + item.nominalTunggakan, 0),
       daftarTunggakan,
+    };
+
+    // Save to Redis Cache (30s)
+    await setCache(cacheKey, responseData, 30);
+
+    return NextResponse.json(responseData, {
+      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'no-store' },
     });
   } catch (error: any) {
     console.error('Error fetching tunggakan:', error);
@@ -104,3 +121,4 @@ export async function GET(request: Request) {
     );
   }
 }
+

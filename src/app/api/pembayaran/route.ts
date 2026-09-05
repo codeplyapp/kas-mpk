@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { APP_CONFIG } from '@/lib/constants';
+import { getCache, setCache, invalidateCache, cacheKeys } from '@/lib/redis';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -18,6 +19,15 @@ export async function GET(request: Request) {
     const bulan = parseInt(searchParams.get('bulan') || (now.getMonth() + 1).toString(), 10);
     const tahun = parseInt(searchParams.get('tahun') || now.getFullYear().toString(), 10);
     const userIdFilter = searchParams.get('userId');
+
+    // Check Redis Cache
+    const cacheKey = cacheKeys.pembayaran(bulan, tahun, userIdFilter);
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return NextResponse.json(cachedData, {
+        headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-store' },
+      });
+    }
 
     // Fetch all members (role ANGGOTA and BENDAHARA, ordered by Komisi and Nama)
     const userWhere: any = {};
@@ -99,7 +109,7 @@ export async function GET(request: Request) {
     const totalTunggakan = targetBulanIni - totalTerkumpul;
     const totalLunas = matrix.filter((r) => r.isLunas).length;
 
-    return NextResponse.json({
+    const responseData = {
       bulan,
       tahun,
       matrix,
@@ -112,6 +122,13 @@ export async function GET(request: Request) {
         totalTunggakan,
         persentaseLunas: users.length > 0 ? Math.round((totalLunas / users.length) * 100) : 0,
       },
+    };
+
+    // Save to Redis Cache (30s)
+    await setCache(cacheKey, responseData, 30);
+
+    return NextResponse.json(responseData, {
+      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'no-store' },
     });
   } catch (error: any) {
     console.error('Error fetching payments:', error);
@@ -176,6 +193,9 @@ export async function POST(request: Request) {
         });
       }
 
+      // Invalidate Redis cache immediately
+      await invalidateCache(bulan, tahun);
+
       return NextResponse.json({ success: true, message: 'Status iuran 1 bulan berhasil diperbarui' });
     }
 
@@ -217,6 +237,9 @@ export async function POST(request: Request) {
       });
     }
 
+    // Invalidate Redis cache immediately
+    await invalidateCache(bulan, tahun);
+
     return NextResponse.json({ success: true, message: 'Status iuran berhasil diperbarui' });
   } catch (error: any) {
     console.error('Error updating payment:', error);
@@ -226,3 +249,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

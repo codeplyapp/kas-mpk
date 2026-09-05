@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
+import { getCache, setCache, invalidateCache, cacheKeys } from '@/lib/redis';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -18,6 +19,21 @@ export async function GET(request: Request) {
     const bulan = searchParams.get('bulan');
     const tahun = searchParams.get('tahun');
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!, 10) : undefined;
+
+    // Check Redis Cache
+    const cacheKey = cacheKeys.arusKas(
+      bulan ? parseInt(bulan, 10) : null,
+      tahun ? parseInt(tahun, 10) : null,
+      jenis,
+      kategori,
+      limit || null
+    );
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) {
+      return NextResponse.json(cachedData, {
+        headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-store' },
+      });
+    }
 
     const where: any = {};
     if (jenis === 'MASUK' || jenis === 'KELUAR') {
@@ -66,7 +82,7 @@ export async function GET(request: Request) {
 
     const totalSaldo = totalIuran + totalArusMasuk - totalArusKeluar;
 
-    return NextResponse.json({
+    const responseData = {
       items,
       summary: {
         totalIuran,
@@ -75,6 +91,13 @@ export async function GET(request: Request) {
         totalPemasukan: totalIuran + totalArusMasuk,
         totalSaldo,
       },
+    };
+
+    // Save to Redis Cache (30s)
+    await setCache(cacheKey, responseData, 30);
+
+    return NextResponse.json(responseData, {
+      headers: { 'X-Cache': 'MISS', 'Cache-Control': 'no-store' },
     });
   } catch (error: any) {
     console.error('Error fetching arus kas:', error);
@@ -116,6 +139,9 @@ export async function POST(request: Request) {
       },
     });
 
+    // Invalidate Redis cache
+    await invalidateCache();
+
     return NextResponse.json({
       success: true,
       message: 'Transaksi arus kas berhasil dicatat',
@@ -129,3 +155,4 @@ export async function POST(request: Request) {
     );
   }
 }
+

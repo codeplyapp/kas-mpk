@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
+import { invalidateCache } from '@/lib/redis';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -33,6 +34,9 @@ export async function PUT(
         ...(keterangan ? { keterangan: keterangan.trim() } : {}),
       },
     });
+
+    // Invalidate Redis cache
+    await invalidateCache();
 
     return NextResponse.json({
       success: true,
@@ -68,6 +72,9 @@ export async function DELETE(
       where: { id },
     });
 
+    // Invalidate Redis cache
+    await invalidateCache();
+
     return NextResponse.json({
       success: true,
       message: 'Transaksi berhasil dihapus',
@@ -80,3 +87,4 @@ export async function DELETE(
     );
   }
 }
+
