@@ -1,0 +1,306 @@
+[
+    {
+        "nama": "Alvano Ghulwani Putra",
+        "jabatan": "Ketua Umum",
+        "komisi": "BPH MPK",
+        "kelas": "XI.5",
+        "username": "alvano.xi5",
+        "password": "BphAlvano2026"
+    },
+    {
+        "nama": "Walmond Alvaro Sitepu",
+        "jabatan": "Ketua 1",
+        "komisi": "BPH MPK",
+        "kelas": "XI.3",
+        "username": "walmond.xi3",
+        "password": "BphWalmond2026"
+    },
+    {
+        "nama": "Melsya Herlin Viane",
+        "jabatan": "Ketua 2",
+        "komisi": "BPH MPK",
+        "kelas": "X.3",
+        "username": "melsya.x3",
+        "password": "BphMelsya2026"
+    },
+    {
+        "nama": "Cikal Paskal Jabbar",
+        "jabatan": "Sekretaris 1",
+        "komisi": "BPH MPK",
+        "kelas": "XI.6",
+        "username": "cikal.xi6",
+        "password": "BphCikal2026"
+    },
+    {
+        "nama": "Chintya Christie",
+        "jabatan": "Sekretaris 2",
+        "komisi": "BPH MPK",
+        "kelas": "X.7",
+        "username": "chintya.x7",
+        "password": "BphChintya2026"
+    },
+    {
+        "nama": "Dewi Madha Lintang",
+        "jabatan": "Bendahara 1",
+        "komisi": "BPH MPK",
+        "kelas": "XI.5",
+        "username": "dewi.xi5",
+        "password": "BphDewi2026"
+    },
+    {
+        "nama": "Nyoman Nheo Nayaka",
+        "jabatan": "Bendahara 2",
+        "komisi": "BPH MPK",
+        "kelas": "X.6",
+        "username": "nyoman.x6",
+        "password": "BphNyoman2026"
+    },
+    {
+        "nama": "Qurotul Afidah Bilqisti",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI AD/ART",
+        "kelas": "XI.2",
+        "username": "qurotul.xi2",
+        "password": "AdartQurotul2026"
+    },
+    {
+        "nama": "I Nyoman Febrinzo",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI AD/ART",
+        "kelas": "XI.6",
+        "username": "febrinzo.xi6",
+        "password": "AdartFebrinzo2026"
+    },
+    {
+        "nama": "Muhammad Adyastha Pramanasari",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI AD/ART",
+        "kelas": "XI.1",
+        "username": "adyastha.xi1",
+        "password": "AdartAdyastha2026"
+    },
+    {
+        "nama": "St. Syaza Aisyah",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI AD/ART",
+        "kelas": "X.6",
+        "username": "syaza.x6",
+        "password": "AdartSyaza2026"
+    },
+    {
+        "nama": "Sean Ibn Pradana",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI AD/ART",
+        "kelas": "X.4",
+        "username": "sean.x4",
+        "password": "AdartSean2026"
+    },
+    {
+        "nama": "Zahra Faizza",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI EVALUASI",
+        "kelas": "XI.3",
+        "username": "zahra.xi3",
+        "password": "EvalZahra2026"
+    },
+    {
+        "nama": "Bima Satrio Wicaksono",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI EVALUASI",
+        "kelas": "XI.3",
+        "username": "bima.xi3",
+        "password": "EvalBima2026"
+    },
+    {
+        "nama": "I Gusti Putu Krisna",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI EVALUASI",
+        "kelas": "XI.4",
+        "username": "krisna.xi4",
+        "password": "EvalKrisna2026"
+    },
+    {
+        "nama": "Muhammad Hafizhul Ibra",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI EVALUASI",
+        "kelas": "X.6",
+        "username": "hafizhul.x6",
+        "password": "EvalHafizhul2026"
+    },
+    {
+        "nama": "Dinda Shakira Nur Khadijah",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI EVALUASI",
+        "kelas": "X.1",
+        "username": "dinda.x1",
+        "password": "EvalDinda2026"
+    },
+    {
+        "nama": "Muhammad Syafiq Alzam",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI EVALUASI",
+        "kelas": "X.3",
+        "username": "syafiq.x3",
+        "password": "EvalSyafiq2026"
+    },
+    {
+        "nama": "M Farel",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI PUBLIKASI",
+        "kelas": "XI.5",
+        "username": "farel.xi5",
+        "password": "PubFarel2026"
+    },
+    {
+        "nama": "Rangga Arya Putra",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI PUBLIKASI",
+        "kelas": "XI.2",
+        "username": "rangga.xi2",
+        "password": "PubRangga2026"
+    },
+    {
+        "nama": "I Made Wira",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI PUBLIKASI",
+        "kelas": "XI.5",
+        "username": "wira.xi5",
+        "password": "PubWira2026"
+    },
+    {
+        "nama": "Putri Armayda",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI PUBLIKASI",
+        "kelas": "X.3",
+        "username": "putri.x3",
+        "password": "PubPutri2026"
+    },
+    {
+        "nama": "Ailsa Marsha Ludmila",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI PUBLIKASI",
+        "kelas": "X.2",
+        "username": "ailsa.x2",
+        "password": "PubAilsa2026"
+    },
+    {
+        "nama": "Febryano Rizal Veriyanto",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI PUBLIKASI",
+        "kelas": "X.4",
+        "username": "febryano.x4",
+        "password": "PubFebryano2026"
+    },
+    {
+        "nama": "Radhitya Arya Satya",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI PUBLIKASI",
+        "kelas": "X.2",
+        "username": "radhitya.x2",
+        "password": "PubRadhitya2026"
+    },
+    {
+        "nama": "M Kahlilray Gaza El Rabay",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI TATIB",
+        "kelas": "XI.2",
+        "username": "kahlilray.xi2",
+        "password": "TatibKahlilray2026"
+    },
+    {
+        "nama": "Jiilan Fahira Funiba",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI TATIB",
+        "kelas": "XI.5",
+        "username": "jiilan.xi5",
+        "password": "TatibJiilan2026"
+    },
+    {
+        "nama": "Brian Dzaky Widyadhana",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI TATIB",
+        "kelas": "XI.2",
+        "username": "brian.xi2",
+        "password": "TatibBrian2026"
+    },
+    {
+        "nama": "Joanne Justice Yap Mangesa",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI TATIB",
+        "kelas": "X.3",
+        "username": "joanne.x3",
+        "password": "TatibJoanne2026"
+    },
+    {
+        "nama": "Ravada Ario Dighoyono",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI TATIB",
+        "kelas": "X.1",
+        "username": "ravada.x1",
+        "password": "TatibRavada2026"
+    },
+    {
+        "nama": "Adiyasha Praja Kusumu",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI TATIB",
+        "kelas": "X.6",
+        "username": "adiyasha.x6",
+        "password": "TatibAdiyasha2026"
+    },
+    {
+        "nama": "Gesta Abiyyu Amaresa",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI DPS",
+        "kelas": "XI.1",
+        "username": "gesta.xi1",
+        "password": "DpsGesta2026"
+    },
+    {
+        "nama": "Muhammad Rayyan Agha",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI DPS",
+        "kelas": "XI.4",
+        "username": "rayyan.xi4",
+        "password": "DpsRayyan2026"
+    },
+    {
+        "nama": "Drainaya Visi Reskia",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI DPS",
+        "kelas": "XI.1",
+        "username": "drainaya.xi1",
+        "password": "DpsDrainaya2026"
+    },
+    {
+        "nama": "Tania Callista Amanda",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI DPS",
+        "kelas": "XI.3",
+        "username": "tania.xi3",
+        "password": "DpsTania2026"
+    },
+    {
+        "nama": "Sersya Hilmi Yovana",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI DPS",
+        "kelas": "X.2",
+        "username": "sersya.x2",
+        "password": "DpsSersya2026"
+    },
+    {
+        "nama": "Ryukenzo Jeremia Panatahan",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI DPS",
+        "kelas": "X.1",
+        "username": "ryukenzo.x1",
+        "password": "DpsRyukenzo2026"
+    },
+    {
+        "nama": "Bintang Trijaya Tamaela",
+        "jabatan": "Anggota",
+        "komisi": "KOMISI DPS",
+        "kelas": "X.7",
+        "username": "bintang.x7",
+        "password": "DpsBintang2026"
+    }
+]
