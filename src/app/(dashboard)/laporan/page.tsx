@@ -279,6 +279,15 @@ export default function LaporanPage() {
       // Kiri: Ketua Umum MPK
       doc.text('Mengetahui,', 20, finalY3 + 5);
       doc.text('Ketua Umum MPK,', 20, finalY3 + 10);
+
+      // Stempel Resmi MPK Transparan (Authentic Stamp Overlay)
+      try {
+        const stampData = await getBase64ImageFromUrl('/stempel-mpk.png');
+        doc.addImage(stampData, 'PNG', 14, finalY3 + 6, 26, 26);
+      } catch (e) {
+        console.error('Stempel loading failed:', e);
+      }
+
       doc.setFont('times', 'bold');
       doc.text('Alvano Ghulwani Putra Jr', 20, finalY3 + 26);
       doc.setFont('times', 'normal');
