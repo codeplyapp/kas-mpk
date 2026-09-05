@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Wallet,
   Plus,
@@ -14,6 +14,7 @@ import {
   Sparkles,
   TrendingDown,
   TrendingUp,
+  RefreshCw,
 } from 'lucide-react';
 import { formatRupiah, formatTanggal } from '@/lib/format';
 import { NAMA_BULAN, KATEGORI_PENGELUARAN, KATEGORI_PEMASUKAN } from '@/lib/constants';
@@ -25,6 +26,7 @@ export default function ArusKasPage() {
   const [items, setItems] = useState<ArusKasItem[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [filterJenis, setFilterJenis] = useState<string>('ALL');
   const [filterKategori, setFilterKategori] = useState<string>('ALL');
@@ -52,7 +54,7 @@ export default function ArusKasPage() {
 
   const fetchUser = async () => {
     try {
-      const res = await fetch('/api/auth/me');
+      const res = await fetch('/api/auth/me', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setCurrentUser(data.user);
@@ -60,10 +62,12 @@ export default function ArusKasPage() {
     } catch (e) {}
   };
 
-  const fetchArusKas = async () => {
-    setLoading(true);
+  const fetchArusKas = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
+    else setIsRefreshing(true);
+
     try {
-      const res = await fetch(`/api/arus-kas?bulan=${filterBulan}&tahun=${filterTahun}`);
+      const res = await fetch(`/api/arus-kas?bulan=${filterBulan}&tahun=${filterTahun}`, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setItems(data.items || []);
@@ -73,11 +77,28 @@ export default function ArusKasPage() {
       console.error('Error fetching arus kas:', err);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
-  };
+  }, [filterBulan, filterTahun]);
 
   useEffect(() => { fetchUser(); }, []);
-  useEffect(() => { fetchArusKas(); }, [filterBulan, filterTahun]);
+
+  useEffect(() => {
+    fetchArusKas(false);
+
+    // Real-time polling every 6 seconds
+    const interval = setInterval(() => {
+      fetchArusKas(true);
+    }, 6000);
+
+    const onFocus = () => fetchArusKas(true);
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [fetchArusKas]);
 
   const isBendahara = currentUser?.role === 'BENDAHARA';
 
@@ -193,8 +214,23 @@ export default function ArusKasPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#1e293b] tracking-tight">Manajemen Arus Kas</h1>
-          <p className="text-xs text-[#64748b] mt-0.5">
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold text-[#1e293b] tracking-tight">Manajemen Arus Kas</h1>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Live Sync
+            </span>
+            <button
+              onClick={() => fetchArusKas(true)}
+              disabled={isRefreshing}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-medium text-[#64748b] bg-slate-100 hover:bg-slate-200 transition-colors"
+              title="Sinkronisasi Data Real-Time"
+            >
+              <RefreshCw className={`w-2.5 h-2.5 ${isRefreshing ? 'animate-spin text-[#c09891]' : ''}`} />
+              {isRefreshing ? 'Memperbarui...' : 'Sinkron'}
+            </button>
+          </div>
+          <p className="text-xs text-[#64748b]">
             Catat dan pantau seluruh uang masuk non-iuran dan pengeluaran kegiatan MPK
           </p>
         </div>

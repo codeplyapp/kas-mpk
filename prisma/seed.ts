@@ -1,4 +1,4 @@
-import { PrismaClient, Role, JenisArusKas } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import fs from 'fs';
 import path from 'path';
@@ -124,95 +124,7 @@ async function main() {
   }
 
   console.log(`Successfully updated/created ${createdUsers.length} users with their respective usernames and passwords.`);
-
-  // 4. Sample Payments for Bulan 8 Tahun 2026 (Agustus 2026) if none exists
-  const existingPaymentsCount = await prisma.pembayaran.count();
-  if (existingPaymentsCount === 0) {
-    const currentBulan = 8;
-    const currentTahun = 2026;
-    let paymentCount = 0;
-
-    for (let i = 0; i < createdUsers.length; i++) {
-      const u = createdUsers[i];
-      let paidWeeks = 4;
-      if (i % 5 === 0) paidWeeks = 2;
-      else if (i % 7 === 0) paidWeeks = 1;
-      else if (i % 11 === 0) paidWeeks = 0;
-      else if (i % 3 === 0) paidWeeks = 3;
-
-      for (let w = 1; w <= paidWeeks; w++) {
-        await prisma.pembayaran.upsert({
-          where: {
-            userId_bulan_tahun_mingguKe: {
-              userId: u.id,
-              bulan: currentBulan,
-              tahun: currentTahun,
-              mingguKe: w,
-            },
-          },
-          update: {},
-          create: {
-            userId: u.id,
-            bulan: currentBulan,
-            tahun: currentTahun,
-            mingguKe: w,
-            nominal: 5000,
-            tglBayar: new Date(2026, 7, w * 7),
-          },
-        });
-        paymentCount++;
-      }
-    }
-    console.log(`Created ${paymentCount} sample payments.`);
-  } else {
-    console.log(`Preserved ${existingPaymentsCount} existing payment records.`);
-  }
-
-  // 5. Sample Arus Kas if none exists
-  const existingArusKasCount = await prisma.arusKas.count();
-  if (existingArusKasCount === 0) {
-    const sampleArusKas = [
-      {
-        tanggal: new Date(2026, 7, 1),
-        jenis: JenisArusKas.MASUK,
-        nominal: 250000,
-        kategori: 'Saldo Awal Periode',
-        keterangan: 'Sisa saldo kas MPK periode sebelumnya 2025/2026',
-      },
-      {
-        tanggal: new Date(2026, 7, 10),
-        jenis: JenisArusKas.KELUAR,
-        nominal: 45000,
-        kategori: 'ATK & Cetak',
-        keterangan: 'Pembelian buku catatan kas, map arsip, dan pulpen pengurus',
-      },
-      {
-        tanggal: new Date(2026, 7, 15),
-        jenis: JenisArusKas.KELUAR,
-        nominal: 80000,
-        kategori: 'Konsumsi Rapat',
-        keterangan: 'Snack & konsumsi rapat pleno bulanan MPK bersama OSIS',
-      },
-      {
-        tanggal: new Date(2026, 7, 22),
-        jenis: JenisArusKas.MASUK,
-        nominal: 100000,
-        kategori: 'Sumbangan & Donasi',
-        keterangan: 'Dana apresiasi pembina MPK SMAN 2 Taruna Bhayangkara',
-      },
-    ];
-
-    for (const ak of sampleArusKas) {
-      await prisma.arusKas.create({
-        data: ak,
-      });
-    }
-    console.log('Sample Arus Kas created.');
-  } else {
-    console.log(`Preserved ${existingArusKasCount} existing Arus Kas records.`);
-  }
-
-  console.log('Seeding completed successfully! 🚀');
+  console.log('Clean database setup complete - NO dummy transactions created! 🚀');
 }
 
 main()

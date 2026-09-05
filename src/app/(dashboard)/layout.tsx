@@ -33,30 +33,48 @@ export default function DashboardLayout({
   const [saldo, setSaldo] = useState<number | null>(null);
 
   useEffect(() => {
-    async function loadData() {
+    let isMounted = true;
+
+    async function loadData(isInitial = false) {
       try {
-        const resUser = await fetch('/api/auth/me');
+        if (isInitial) setLoadingUser(true);
+
+        const resUser = await fetch('/api/auth/me', { cache: 'no-store' });
         if (resUser.ok) {
           const data = await resUser.json();
-          setCurrentUser(data.user);
-        } else {
+          if (isMounted) setCurrentUser(data.user);
+        } else if (isInitial) {
           router.push('/login');
           return;
         }
 
-        const resKas = await fetch('/api/arus-kas');
+        const resKas = await fetch('/api/arus-kas', { cache: 'no-store' });
         if (resKas.ok) {
           const dataKas = await resKas.json();
-          setSaldo(dataKas.summary?.totalSaldo || 0);
+          if (isMounted) setSaldo(dataKas.summary?.totalSaldo || 0);
         }
       } catch (err) {
         console.error('Error loading session:', err);
       } finally {
-        setLoadingUser(false);
+        if (isMounted && isInitial) setLoadingUser(false);
       }
     }
 
-    loadData();
+    loadData(true);
+
+    // Auto-refresh saldo every 8 seconds
+    const interval = setInterval(() => {
+      loadData(false);
+    }, 8000);
+
+    const onFocus = () => loadData(false);
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
   }, [router, pathname]);
 
   const handleLogout = async () => {

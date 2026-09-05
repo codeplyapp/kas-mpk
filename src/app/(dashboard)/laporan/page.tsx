@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -14,6 +14,7 @@ import {
   Wallet,
   ArrowUpRight,
   ArrowDownRight,
+  RefreshCw,
 } from 'lucide-react';
 import { formatRupiah, formatTanggal, getRentangTanggalMinggu, getKeteranganMinggu } from '@/lib/format';
 import { NAMA_BULAN, APP_CONFIG } from '@/lib/constants';
@@ -26,46 +27,63 @@ export default function LaporanPage() {
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
 
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [matrixData, setMatrixData] = useState<any[]>([]);
   const [iuranSummary, setIuranSummary] = useState<any>(null);
   const [arusKasItems, setArusKasItems] = useState<ArusKasItem[]>([]);
   const [arusKasSummary, setArusKasSummary] = useState<any>(null);
   const [exportingPDF, setExportingPDF] = useState(false);
 
-  useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      try {
-        const resMe = await fetch('/api/auth/me');
-        if (resMe.ok) {
-          const dataMe = await resMe.json();
-          setCurrentUser(dataMe.user);
-        }
+  const loadData = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
+    else setIsRefreshing(true);
 
-        // Fetch Payments
-        const resIuran = await fetch(`/api/pembayaran?bulan=${bulan}&tahun=${tahun}`);
-        if (resIuran.ok) {
-          const dataI = await resIuran.json();
-          setMatrixData(dataI.matrix || []);
-          setIuranSummary(dataI.summary || null);
-        }
-
-        // Fetch Arus Kas
-        const resKas = await fetch(`/api/arus-kas?bulan=${bulan}&tahun=${tahun}`);
-        if (resKas.ok) {
-          const dataK = await resKas.json();
-          setArusKasItems(dataK.items || []);
-          setArusKasSummary(dataK.summary || null);
-        }
-      } catch (err) {
-        console.error('Error loading report data:', err);
-      } finally {
-        setLoading(false);
+    try {
+      const resMe = await fetch('/api/auth/me', { cache: 'no-store' });
+      if (resMe.ok) {
+        const dataMe = await resMe.json();
+        setCurrentUser(dataMe.user);
       }
-    }
 
-    loadData();
+      // Fetch Payments
+      const resIuran = await fetch(`/api/pembayaran?bulan=${bulan}&tahun=${tahun}`, { cache: 'no-store' });
+      if (resIuran.ok) {
+        const dataI = await resIuran.json();
+        setMatrixData(dataI.matrix || []);
+        setIuranSummary(dataI.summary || null);
+      }
+
+      // Fetch Arus Kas
+      const resKas = await fetch(`/api/arus-kas?bulan=${bulan}&tahun=${tahun}`, { cache: 'no-store' });
+      if (resKas.ok) {
+        const dataK = await resKas.json();
+        setArusKasItems(dataK.items || []);
+        setArusKasSummary(dataK.summary || null);
+      }
+    } catch (err) {
+      console.error('Error loading report data:', err);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
   }, [bulan, tahun]);
+
+  useEffect(() => {
+    loadData(false);
+
+    // Real-time polling every 8 seconds
+    const interval = setInterval(() => {
+      loadData(true);
+    }, 8000);
+
+    const onFocus = () => loadData(true);
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [loadData]);
 
   const namaBulanStr = NAMA_BULAN[bulan - 1];
 
@@ -283,10 +301,25 @@ export default function LaporanPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#1e293b] tracking-tight">
-            {isBendahara ? 'Laporan Keuangan & Ekspor Dokumen' : 'Laporan Keuangan Kas MPK'}
-          </h1>
-          <p className="text-xs text-[#64748b] mt-0.5">
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold text-[#1e293b] tracking-tight">
+              {isBendahara ? 'Laporan Keuangan & Ekspor Dokumen' : 'Laporan Keuangan Kas MPK'}
+            </h1>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Live Sync
+            </span>
+            <button
+              onClick={() => loadData(true)}
+              disabled={isRefreshing}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-medium text-[#64748b] bg-slate-100 hover:bg-slate-200 transition-colors"
+              title="Sinkronisasi Data Real-Time"
+            >
+              <RefreshCw className={`w-2.5 h-2.5 ${isRefreshing ? 'animate-spin text-[#c09891]' : ''}`} />
+              {isRefreshing ? 'Memperbarui...' : 'Sinkron'}
+            </button>
+          </div>
+          <p className="text-xs text-[#64748b]">
             {isBendahara
               ? 'Cetak dan unduh laporan kas ber-kop resmi SMAN 2 Taruna Bhayangkara format PDF'
               : 'Pratinjau transparansi pembukuan dan arus kas resmi SMAN 2 Taruna Bhayangkara Jawa Timur'}

@@ -4,6 +4,9 @@ import { getSession } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 import { Role } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: Request) {
   try {
     const session = await getSession();

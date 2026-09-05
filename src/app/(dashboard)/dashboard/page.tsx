@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Wallet,
@@ -11,6 +11,8 @@ import {
   Users,
   Clock,
   ArrowRight,
+  RefreshCw,
+  Radio,
 } from 'lucide-react';
 import { formatRupiah, formatTanggal, getKeteranganMinggu } from '@/lib/format';
 import { NAMA_BULAN } from '@/lib/constants';
@@ -19,6 +21,8 @@ import { UserSession, ArusKasItem } from '@/types';
 export default function DashboardPage() {
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastSync, setLastSync] = useState<Date>(new Date());
 
   const now = new Date();
   const [bulan, setBulan] = useState(now.getMonth() + 1);
@@ -30,61 +34,79 @@ export default function DashboardPage() {
   const [recentArusKas, setRecentArusKas] = useState<ArusKasItem[]>([]);
   const [komisiStats, setKomisiStats] = useState<any[]>([]);
 
-  useEffect(() => {
-    async function loadDashboard() {
-      setLoading(true);
-      try {
-        const resMe = await fetch('/api/auth/me');
-        if (!resMe.ok) return;
-        const dataMe = await resMe.json();
-        setCurrentUser(dataMe.user);
+  const loadDashboard = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
+    else setIsRefreshing(true);
 
-        const resKas = await fetch(`/api/arus-kas?bulan=${bulan}&tahun=${tahun}`);
-        if (resKas.ok) {
-          const dataKas = await resKas.json();
-          setKasSummary(dataKas.summary);
-          setRecentArusKas(dataKas.items.slice(0, 5));
-        }
+    try {
+      const resMe = await fetch('/api/auth/me', { cache: 'no-store' });
+      if (!resMe.ok) return;
+      const dataMe = await resMe.json();
+      setCurrentUser(dataMe.user);
 
-        const resIuran = await fetch(`/api/pembayaran?bulan=${bulan}&tahun=${tahun}`);
-        if (resIuran.ok) {
-          const dataIuran = await resIuran.json();
-          setIuranSummary(dataIuran.summary);
-
-          const myRow = dataIuran.matrix.find((m: any) => m.userId === dataMe.user.id);
-          setPersonalMatrix(myRow);
-
-          const komisiMap = new Map<string, { total: number; lunas: number; terkumpul: number }>();
-          dataIuran.matrix.forEach((m: any) => {
-            const k = m.komisi || 'Umum';
-            if (!komisiMap.has(k)) {
-              komisiMap.set(k, { total: 0, lunas: 0, terkumpul: 0 });
-            }
-            const stat = komisiMap.get(k)!;
-            stat.total += 1;
-            if (m.isLunas) stat.lunas += 1;
-            stat.terkumpul += m.totalPaid;
-          });
-
-          const kStats: any[] = [];
-          komisiMap.forEach((val, key) => {
-            kStats.push({
-              komisi: key,
-              ...val,
-              persen: Math.round((val.lunas / val.total) * 100),
-            });
-          });
-          setKomisiStats(kStats);
-        }
-      } catch (err) {
-        console.error('Error fetching dashboard:', err);
-      } finally {
-        setLoading(false);
+      const resKas = await fetch(`/api/arus-kas?bulan=${bulan}&tahun=${tahun}`, { cache: 'no-store' });
+      if (resKas.ok) {
+        const dataKas = await resKas.json();
+        setKasSummary(dataKas.summary);
+        setRecentArusKas(dataKas.items.slice(0, 5));
       }
-    }
 
-    loadDashboard();
+      const resIuran = await fetch(`/api/pembayaran?bulan=${bulan}&tahun=${tahun}`, { cache: 'no-store' });
+      if (resIuran.ok) {
+        const dataIuran = await resIuran.json();
+        setIuranSummary(dataIuran.summary);
+
+        const myRow = dataIuran.matrix.find((m: any) => m.userId === dataMe.user.id);
+        setPersonalMatrix(myRow);
+
+        const komisiMap = new Map<string, { total: number; lunas: number; terkumpul: number }>();
+        dataIuran.matrix.forEach((m: any) => {
+          const k = m.komisi || 'Umum';
+          if (!komisiMap.has(k)) {
+            komisiMap.set(k, { total: 0, lunas: 0, terkumpul: 0 });
+          }
+          const stat = komisiMap.get(k)!;
+          stat.total += 1;
+          if (m.isLunas) stat.lunas += 1;
+          stat.terkumpul += m.totalPaid;
+        });
+
+        const kStats: any[] = [];
+        komisiMap.forEach((val, key) => {
+          kStats.push({
+            komisi: key,
+            ...val,
+            persen: Math.round((val.lunas / val.total) * 100),
+          });
+        });
+        setKomisiStats(kStats);
+      }
+      setLastSync(new Date());
+    } catch (err) {
+      console.error('Error fetching dashboard:', err);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
   }, [bulan, tahun]);
+
+  useEffect(() => {
+    loadDashboard(false);
+
+    // Auto-refresh real-time polling every 8 seconds
+    const interval = setInterval(() => {
+      loadDashboard(true);
+    }, 8000);
+
+    // Refresh on tab focus
+    const onFocus = () => loadDashboard(true);
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [loadDashboard]);
 
   const isBendahara = currentUser?.role === 'BENDAHARA';
 
@@ -144,9 +166,24 @@ export default function DashboardPage() {
         <div className="absolute bottom-0 right-16 w-24 h-24 bg-[#f4dbd8]/40 rounded-full translate-y-1/2 pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold text-[#c09891] uppercase tracking-wider mb-1">
-              {NAMA_BULAN[bulan - 1]} {tahun}
-            </p>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-semibold text-[#c09891] uppercase tracking-wider">
+                {NAMA_BULAN[bulan - 1]} {tahun}
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live Sync
+              </span>
+              <button
+                onClick={() => loadDashboard(true)}
+                disabled={isRefreshing}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-medium text-[#64748b] bg-slate-100 hover:bg-slate-200 transition-colors"
+                title="Sinkronisasi Data Real-Time"
+              >
+                <RefreshCw className={`w-2.5 h-2.5 ${isRefreshing ? 'animate-spin text-[#c09891]' : ''}`} />
+                {isRefreshing ? 'Memperbarui...' : 'Sinkron'}
+              </button>
+            </div>
             <h1 className="text-2xl font-bold text-[#1e293b] tracking-tight">
               Selamat Datang, {currentUser?.nama} 👋
             </h1>

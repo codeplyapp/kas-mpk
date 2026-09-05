@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import confetti from 'canvas-confetti';
 import {
   CheckCircle2,
@@ -9,6 +9,7 @@ import {
   Calendar,
   Filter,
   Search,
+  RefreshCw,
 } from 'lucide-react';
 import { formatRupiah, getKeteranganMinggu } from '@/lib/format';
 import { NAMA_BULAN, DAFTAR_KOMISI, APP_CONFIG } from '@/lib/constants';
@@ -41,6 +42,7 @@ export default function IuranPage() {
   const [matrixData, setMatrixData] = useState<MatrixRow[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [savingUser, setSavingUser] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -49,10 +51,12 @@ export default function IuranPage() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const fetchMatrix = async () => {
-    setLoading(true);
+  const fetchMatrix = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
+    else setIsRefreshing(true);
+
     try {
-      const res = await fetch(`/api/pembayaran?bulan=${bulan}&tahun=${tahun}`);
+      const res = await fetch(`/api/pembayaran?bulan=${bulan}&tahun=${tahun}`, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setMatrixData(data.matrix || []);
@@ -62,12 +66,26 @@ export default function IuranPage() {
       console.error('Error fetching payments:', err);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
-  };
+  }, [bulan, tahun]);
 
   useEffect(() => {
-    fetchMatrix();
-  }, [bulan, tahun]);
+    fetchMatrix(false);
+
+    // Real-time polling every 6 seconds
+    const interval = setInterval(() => {
+      fetchMatrix(true);
+    }, 6000);
+
+    const onFocus = () => fetchMatrix(true);
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [fetchMatrix]);
 
   const handleToggleWeek = async (userId: string, week: 1 | 2 | 3 | 4, currentStatus: boolean) => {
     const newStatus = !currentStatus;
@@ -175,7 +193,22 @@ export default function IuranPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#1e293b] tracking-tight">Input & Rekap Iuran Kas</h1>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold text-[#1e293b] tracking-tight">Input & Rekap Iuran Kas</h1>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Live Sync
+            </span>
+            <button
+              onClick={() => fetchMatrix(true)}
+              disabled={isRefreshing}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-medium text-[#64748b] bg-slate-100 hover:bg-slate-200 transition-colors"
+              title="Sinkronisasi Data Real-Time"
+            >
+              <RefreshCw className={`w-2.5 h-2.5 ${isRefreshing ? 'animate-spin text-[#c09891]' : ''}`} />
+              {isRefreshing ? 'Syncing...' : 'Sync'}
+            </button>
+          </div>
           <p className="text-xs text-[#64748b] mt-0.5">
             Kelola pembayaran Rp 5.000 / minggu · 4 minggu per bulan
           </p>

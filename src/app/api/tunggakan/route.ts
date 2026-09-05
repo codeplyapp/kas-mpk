@@ -4,6 +4,9 @@ import { getSession } from '@/lib/auth';
 import { APP_CONFIG, NAMA_BULAN } from '@/lib/constants';
 import { generateWhatsAppLink } from '@/lib/format';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: Request) {
   try {
     const session = await getSession();
