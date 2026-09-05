@@ -524,30 +524,43 @@ export default function LaporanPage() {
           </div>
           {matrixData.length > 8 && (
             <div className="text-[11px] text-slate-500 italic text-center">
-              ... dan {matrixData.length - 8} pengurus lainnya (seluruh data lengkap tercetak pada dokumen PDF & Excel).
+              ... dan {matrixData.length - 8} pengurus lainnya (seluruh data lengkap tercetak pada dokumen PDF resmi).
             </div>
           )}
         </div>
 
-        {/* Tanda Tangan */}
+        {/* Tanda Tangan & Stempel Resmi */}
         <div className="pt-8 grid grid-cols-2 text-xs text-slate-900">
-          <div className="text-center">
+          <div className="text-center flex flex-col items-center">
             <div>Mengetahui,</div>
-            <div className="font-semibold">Ketua Umum MPK</div>
-            <div className="h-16 flex items-center justify-center text-slate-400 italic text-[11px]">
-              [Tanda Tangan Digital]
+            <div className="font-semibold text-slate-900">Ketua Umum MPK</div>
+            
+            {/* Area Tanda Tangan & Cap Stempel Resmi */}
+            <div className="relative h-28 w-44 flex items-center justify-center my-1">
+              <img
+                src="/stempel-mpk.png"
+                alt="Stempel Resmi MPK Trenggana Sumapala"
+                className="absolute inset-0 m-auto w-24 h-24 object-contain opacity-90 -rotate-3 pointer-events-none drop-shadow-sm select-none"
+              />
+              <div className="z-10 text-slate-400 italic text-[11px] font-mono select-none bg-white/40 px-2 py-0.5 rounded backdrop-blur-[0.5px]">
+                [Tanda Tangan Digital]
+              </div>
             </div>
-            <div className="font-bold underline">Alvano Ghulwani Putra Jr</div>
+
+            <div className="font-bold underline text-slate-950">Alvano Ghulwani Putra Jr</div>
             <div className="text-[10px] text-slate-600 mt-0.5">NIS. 18391</div>
           </div>
 
-          <div className="text-center">
+          <div className="text-center flex flex-col items-center">
             <div>Banyuwangi, {formatTanggal(new Date())}</div>
-            <div className="font-semibold">Bendahara MPK</div>
-            <div className="h-16 flex items-center justify-center text-slate-400 italic text-[11px]">
+            <div className="font-semibold text-slate-900">Bendahara MPK</div>
+            
+            {/* Area Tanda Tangan Bendahara */}
+            <div className="h-28 flex items-center justify-center text-slate-400 italic text-[11px] font-mono select-none my-1">
               [Tanda Tangan Digital]
             </div>
-            <div className="font-bold underline">Dewi Madha Lintang Kencana</div>
+
+            <div className="font-bold underline text-slate-950">Dewi Madha Lintang Kencana</div>
             <div className="text-[10px] text-slate-600 mt-0.5">NIS. 10266</div>
           </div>
         </div>
