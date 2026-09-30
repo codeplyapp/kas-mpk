@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  BENDAHARA
+  ANGGOTA
+}
+
+enum JenisArusKas {
+  MASUK
+  KELUAR
+}
+
+model User {
+  id           String        @id @default(uuid())
+  nama         String
+  username     String        @unique
+  passwordHash String
+  nomorHp      String?       // format: 628xxxxxxxxxx
+  role         Role          @default(ANGGOTA)
+  jabatan      String?       // Contoh: "Ketua Umum", "Bendahara 1", "Anggota Komisi Tatib"
+  kelas        String?       // Contoh: "XI.5", "X.6"
+  komisi       String?       // Contoh: "BPH", "AD/ART", "Evaluasi", "Publikasi", "Tatib", "DPS"
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  pembayaran   Pembayaran[]
+}
+
+model Pembayaran {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bulan     Int      // 1 - 12
+  tahun     Int      // e.g. 2026, 2027
+  mingguKe  Int      // 1, 2, 3, 4
+  nominal   Int      @default(5000)
+  tglBayar  DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@unique([userId, bulan, tahun, mingguKe])
+}
+
+model ArusKas {
+  id         String       @id @default(uuid())
+  tanggal    DateTime     @default(now())
+  jenis      JenisArusKas
+  nominal    Int
+  kategori   String?      // e.g. "Konsumsi Rapat", "ATK & Proposal", "Kas Masuk Non-Iuran", "Perlengkapan"
+  keterangan String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model AppConfig {
+  id               String   @id @default("default")
+  nominalPerMinggu Int      @default(5000)
+  namaOrganisasi   String   @default("MPK Trenggana Sumapala")
+  sekolah          String   @default("SMA Negeri 2 Taruna Bhayangkara Jawa Timur")
+  periode          String   @default("2026/2027")
+  updatedAt        DateTime @updatedAt
+}
